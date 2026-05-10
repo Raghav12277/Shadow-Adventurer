@@ -1,12 +1,10 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Shadow Runner - Endless Adventure</title>
-    
-  <link rel="stylesheet" href="style.css">
-  
+    <title>Shadow Runner</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div id="gameContainer">
@@ -29,13 +27,14 @@
 
         <div id="warningMessage">DRAGONS APPROACHING!</div>
 
-        <div id="gestureHint">Tap to Jump • Swipe Down to Fall</div>
+        <div id="gestureHint">
+            Tap = Jump | Double Tap = Double Jump<br>
+            Scroll Down = Slide
+        </div>
 
-        <!-- Mobile Controls -->
+        <!-- Attack Button Only -->
         <div id="mobileControls">
-            <div class="control-btn" id="btnJump">⬆️</div>
-            <div class="control-btn" id="btnFall">⬇️</div>
-            <div class="control-btn" id="btnAttack">⚔️</div>
+            <button class="control-btn" id="btnAttack">⚔️</button>
         </div>
 
         <div id="startScreen">
@@ -43,8 +42,8 @@
             <p class="subtitle">Endless Adventure Awaits</p>
             <button class="btn btn-start" id="startBtn">Start Game</button>
             <div class="controls-info">
-                <b>Desktop:</b> <span>SPACE/↑</span> Jump • <span>↓</span> Fall • <span>Z/X</span> Attack<br>
-                <b>Mobile:</b> Tap/Buttons to Jump • Swipe Down to Fall • Attack Button
+                <b>Desktop:</b> <span>SPACE/↑</span> Jump • <span>↓</span> Slide • <span>Z/X</span> Attack<br>
+                <b>Mobile:</b> Tap to Jump • Double Tap to Double Jump • Scroll Down to Slide • Button to Attack
             </div>
         </div>
 
@@ -55,6 +54,6 @@
         </div>
     </div>
 
-<script src="game.js"></script>
+    <script src="game.js"></script>
 </body>
-  </html>
+</html>
