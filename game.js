@@ -11,8 +11,8 @@ resizeCanvas();
 window.addEventListener('resize', () => {
     resizeCanvas();
     if (gameRunning) {
-        groundY = canvas.height - 80;
-        // Don't lock player position on resize, just ground
+        groundY = canvas.height - 100;
+        player.y = Math.min(player.y, groundY);
     }
 });
 
@@ -52,8 +52,8 @@ const player = {
     facingRight: true
 };
 
-const gravity = 0.55;
-const jumpPower = -9;
+const gravity = 0.6;
+const jumpPower = -8.5;
 const moveSpeed = 5;
 let groundY = 300;
 
@@ -72,11 +72,6 @@ let lastTapTime = 0;
 let touchStartX = 0;
 let touchStartY = 0;
 let isTouching = false;
-
-// Get screen type for root positioning
-function getScreenType() {
-    return canvas.height > canvas.width ? 'portrait' : 'landscape';
-}
 
 function initBackground() {
     bgStars = [];
@@ -107,8 +102,8 @@ function spawnPlatform() {
     const last = platforms[platforms.length - 1];
     const gap = 100 + Math.random() * 160;
     const width = 140 + Math.random() * 180;
-    const y = Math.max(groundY - 200, Math.min(groundY - 40, 
-        (last ? last.y : groundY - 60) + (Math.random() - 0.5) * 60));
+    const y = Math.max(200, Math.min(canvas.height - 120, 
+        (last ? last.y : groundY) + (Math.random() - 0.5) * 80));
     
     platforms.push({
         x: last ? last.x + last.width + gap : -50,
@@ -122,43 +117,26 @@ function spawnPlatform() {
     });
 }
 
-// ==================== FLYING ROOTS - ADAPTIVE HEIGHTS ====================
+// ==================== FLYING ROOTS / ROCKS ====================
 
 function spawnFlyingRoot() {
-    const screenType = getScreenType();
-    const screenH = canvas.height;
-    
-    // Calculate reachable heights based on actual screen
-    // Single jump reaches about 90-100px up from ground
-    // Double jump reaches about 160-180px up from ground
-    
-    let lowY, midY, highY;
-    
-    if (screenType === 'portrait') {
-        // Portrait: screen is tall but narrow - roots lower
-        lowY = groundY - 70 - Math.random() * 30;      // Easy jump
-        midY = groundY - 110 - Math.random() * 25;     // Good single jump
-        highY = groundY - 150 - Math.random() * 30;    // Double jump
-    } else {
-        // Landscape: more horizontal space - standard heights
-        lowY = groundY - 80 - Math.random() * 30;
-        midY = groundY - 130 - Math.random() * 30;
-        highY = groundY - 180 - Math.random() * 40;
-    }
+    // Spawn at various heights - some reachable by jump, some by double jump
+    const jumpHeight = 90; // Single jump reaches ~90px up
+    const doubleJumpHeight = 160; // Double jump reaches ~160px up
     
     const heightRoll = Math.random();
     let rootY;
     
-    if (heightRoll < 0.35) {
-        rootY = lowY;
-    } else if (heightRoll < 0.7) {
-        rootY = midY;
+    if (heightRoll < 0.4) {
+        // Low - easy single jump
+        rootY = groundY - 80 - Math.random() * 40;
+    } else if (heightRoll < 0.75) {
+        // Medium - requires good single jump or easy double
+        rootY = groundY - 130 - Math.random() * 30;
     } else {
-        rootY = highY;
+        // High - requires double jump
+        rootY = groundY - 180 - Math.random() * 50;
     }
-    
-    // Clamp: never above top of screen + margin
-    rootY = Math.max(60, rootY);
     
     const width = 100 + Math.random() * 120;
     
@@ -170,15 +148,15 @@ function spawnFlyingRoot() {
         baseY: rootY,
         phase: Math.random() * Math.PI * 2,
         speed: 1.2 + Math.random() * 1.8,
-        amplitude: 15 + Math.random() * 25,
+        amplitude: 20 + Math.random() * 35,
         moveType: Math.random() > 0.6 ? 'vertical' : 'horizontal',
-        horizontalRange: 30 + Math.random() * 60,
+        horizontalRange: 40 + Math.random() * 80,
         chainSwing: Math.random() * Math.PI * 2,
         rootType: Math.random() > 0.5 ? 'root' : 'rock'
     });
 }
 
-// ==================== SPIKES ====================
+// ==================== SPIKES / HURDLES ====================
 
 function spawnSpike() {
     const onPlatform = platforms.length > 0 && Math.random() > 0.3;
@@ -208,6 +186,7 @@ function spawnSpike() {
 // ==================== COINS ====================
 
 function spawnCoin() {
+    // Spawn coins on flying roots primarily
     const targetRoots = flyingRoots.filter(r => r.x > 50 && r.x < canvas.width - 50);
     const targetPlatforms = platforms.filter(p => p.x > 50 && p.x < canvas.width - 50);
     
@@ -220,16 +199,17 @@ function spawnCoin() {
         return;
     }
     
+    // Arc pattern of coins
     const count = 3 + Math.floor(Math.random() * 4);
     const startX = target.x + target.width * 0.15;
     const spacing = target.width * 0.7 / count;
-    const arcHeight = 40 + Math.random() * 30;
+    const arcHeight = 50 + Math.random() * 40;
     
     for (let i = 0; i < count; i++) {
         const t = i / (count - 1);
         coins.push({
             x: startX + i * spacing,
-            y: target.y - 35 - Math.sin(t * Math.PI) * arcHeight,
+            y: target.y - 40 - Math.sin(t * Math.PI) * arcHeight,
             radius: 10,
             collected: false,
             bobOffset: Math.random() * Math.PI * 2,
@@ -245,12 +225,11 @@ function spawnEnemy() {
     const isBat = batMode && Math.random() > 0.4;
     
     if (isBat) {
-        // Bats at reachable heights
-        const batY = groundY - 100 - Math.random() * 80;
+        const batY = groundY - 150 - Math.random() * 80;
         
         enemies.push({
             x: canvas.width + 50,
-            y: Math.max(50, batY),
+            y: batY,
             width: 40,
             height: 30,
             type: 'bat',
@@ -308,7 +287,7 @@ function doJump() {
         createParticles(player.x + player.width/2, player.y + player.height, '#88ccff', 6, 2);
         return true;
     } else if (player.jumping && !player.doubleJump && !player.grounded && !player.sliding) {
-        player.velocityY = jumpPower * 0.65;
+        player.velocityY = jumpPower * 0.7;
         player.doubleJump = true;
         createParticles(player.x + player.width/2, player.y + player.height, '#00d4ff', 10, 3);
         particles.push({
@@ -379,7 +358,7 @@ function doAttack() {
 function update() {
     if (!gameRunning) return;
     
-    groundY = canvas.height - 80;
+    groundY = canvas.height - 100;
     
     gameTime += 1/60;
     const mins = Math.floor(gameTime / 60);
@@ -410,13 +389,13 @@ function update() {
     // Horizontal movement
     player.x += player.velocityX;
     player.velocityX *= 0.85;
-    player.x = Math.max(10, Math.min(canvas.width - player.width - 10, player.x));
+    player.x = Math.max(20, Math.min(canvas.width - player.width - 20, player.x));
     
-    // Physics - NO TOP LOCK, only gravity and bottom ground
+    // Physics
     player.velocityY += gravity;
     player.y += player.velocityY;
     
-    // Bottom ground collision ONLY - no top boundary
+    // Ground collision
     if (player.y >= groundY) {
         player.y = groundY;
         player.velocityY = 0;
@@ -427,7 +406,8 @@ function update() {
         player.grounded = false;
     }
     
-    // Platform collision
+    // Platform collision (with collapsing)
+    let onPlatform = false;
     platforms.forEach(p => {
         if (player.velocityY >= 0 &&
             player.x + player.width > p.x + 5 &&
@@ -455,6 +435,7 @@ function update() {
                 player.grounded = true;
                 player.jumping = false;
                 player.doubleJump = false;
+                onPlatform = true;
             }
         }
     });
@@ -462,7 +443,10 @@ function update() {
     
     // ==================== FLYING ROOTS UPDATE ====================
     flyingRoots.forEach(r => {
+        // Scroll left with game
         r.x -= gameSpeed;
+        
+        // Movement animation
         r.phase += 0.02 * r.speed;
         r.chainSwing += 0.03;
         
@@ -484,7 +468,9 @@ function update() {
             player.grounded = true;
             player.jumping = false;
             player.doubleJump = false;
+            onPlatform = true;
             
+            // Move player with horizontal roots
             if (r.moveType === 'horizontal') {
                 player.x += Math.sin(r.phase) * 0.8;
             }
@@ -492,10 +478,13 @@ function update() {
     });
     flyingRoots = flyingRoots.filter(r => r.x + r.width > -200);
     
-    // Spawn flying roots - GUARANTEED
+    // Spawn flying roots - GUARANTEED spawn check
+    const rootChance = Math.min(0.015 + (difficultyLevel * 0.004), 0.04);
     const maxRoots = 2 + Math.floor(difficultyLevel / 2);
+    
     if (flyingRoots.length < maxRoots) {
-        if (Math.random() < 0.02 || flyingRoots.length === 0) {
+        // Force spawn if too few
+        if (Math.random() < rootChance * 3 || flyingRoots.length === 0) {
             spawnFlyingRoot();
         }
     }
@@ -509,6 +498,7 @@ function update() {
     spikes.forEach(s => {
         s.x -= gameSpeed;
         
+        // Warning flash before pop
         const distToPlayer = Math.abs((s.x + s.width/2) - (player.x + player.width/2));
         if (!s.triggered && distToPlayer < 140 && s.y >= groundY - 10) {
             s.triggered = true;
@@ -516,11 +506,13 @@ function update() {
             s.warningFlash = 10;
         }
         
-        if (s.warningFlash > 0) s.warningFlash--;
+        if (s.warningFlash > 0) {
+            s.warningFlash--;
+        }
         
         if (s.triggered && s.popTimer > 0) {
             s.popTimer--;
-            s.y -= 2.5;
+            s.y -= 2.5; // Pop up speed
         }
         
         // Collision
@@ -544,7 +536,9 @@ function update() {
     
     // Spawn spikes
     const spikeChance = 0.012 + (difficultyLevel * 0.004);
-    if (Math.random() < spikeChance) spawnSpike();
+    if (Math.random() < spikeChance) {
+        spawnSpike();
+    }
     
     // Keyboard
     if (keys['ArrowLeft']) {
@@ -935,6 +929,7 @@ function drawEnemy(e) {
 function drawSpike(s) {
     ctx.save();
     
+    // Warning flash before pop
     if (s.warningFlash > 0) {
         ctx.fillStyle = `rgba(255, 50, 50, ${s.warningFlash / 20})`;
         ctx.beginPath();
@@ -969,25 +964,29 @@ function drawSpike(s) {
     ctx.restore();
 }
 
+// ==================== DRAW FLYING ROOTS ====================
+
 function drawFlyingRoot(r) {
     ctx.save();
     
-    const swing = Math.sin(r.chainSwing) * 6;
+    const swing = Math.sin(r.chainSwing) * 8;
     
-    // Chain from top of screen
+    // Chain/rope holding the root
     ctx.strokeStyle = '#2a2a3a';
     ctx.lineWidth = 3;
-    ctx.setLineDash([5, 4]);
+    ctx.setLineDash([6, 4]);
     ctx.beginPath();
-    ctx.moveTo(r.x + r.width/2 + swing, -10);
+    ctx.moveTo(r.x + r.width/2 + swing, r.y - 100);
     ctx.lineTo(r.x + r.width/2 + swing * 0.5, r.y);
     ctx.stroke();
     ctx.setLineDash([]);
     
     if (r.rootType === 'root') {
+        // Tree root style - organic, wooden
         ctx.shadowColor = '#4a3728';
         ctx.shadowBlur = 15;
         
+        // Main root body
         ctx.fillStyle = '#2a1f15';
         ctx.beginPath();
         ctx.moveTo(r.x, r.y + r.height);
@@ -998,6 +997,7 @@ function drawFlyingRoot(r) {
         ctx.closePath();
         ctx.fill();
         
+        // Root texture lines
         ctx.strokeStyle = '#1a120a';
         ctx.lineWidth = 2;
         ctx.beginPath();
@@ -1009,9 +1009,11 @@ function drawFlyingRoot(r) {
         ctx.lineTo(r.x + r.width * 0.5, r.y + 3);
         ctx.stroke();
         
+        // Moss/glow on top
         ctx.fillStyle = '#3a5530';
         ctx.fillRect(r.x + 8, r.y, r.width - 16, 4);
         
+        // Small roots hanging down
         ctx.fillStyle = '#1a120a';
         for (let i = 0; i < 3; i++) {
             const hangX = r.x + 15 + i * (r.width - 30) / 2;
@@ -1022,9 +1024,11 @@ function drawFlyingRoot(r) {
         }
         
     } else {
+        // Floating rock style - stone, cracked
         ctx.shadowColor = '#334455';
         ctx.shadowBlur = 15;
         
+        // Main rock body
         ctx.fillStyle = '#1a2530';
         ctx.beginPath();
         ctx.moveTo(r.x + 5, r.y + r.height);
@@ -1038,6 +1042,7 @@ function drawFlyingRoot(r) {
         ctx.closePath();
         ctx.fill();
         
+        // Rock cracks
         ctx.strokeStyle = '#0f1a25';
         ctx.lineWidth = 2;
         ctx.beginPath();
@@ -1048,9 +1053,11 @@ function drawFlyingRoot(r) {
         ctx.lineTo(r.x + r.width * 0.4, r.y + r.height * 0.4);
         ctx.stroke();
         
+        // Top highlight
         ctx.fillStyle = '#2a3a45';
         ctx.fillRect(r.x + 10, r.y, r.width - 20, 3);
         
+        // Crystal/shard on rock
         ctx.fillStyle = '#4488aa';
         ctx.shadowColor = '#4488aa';
         ctx.shadowBlur = 8;
@@ -1062,6 +1069,7 @@ function drawFlyingRoot(r) {
         ctx.fill();
     }
     
+    // Floating particles around root/rock
     ctx.fillStyle = 'rgba(150, 200, 255, 0.3)';
     ctx.beginPath();
     ctx.arc(r.x + Math.sin(r.phase * 3) * 15, r.y - 10, 2, 0, Math.PI * 2);
@@ -1161,7 +1169,7 @@ function draw() {
         ctx.stroke();
     }
     
-    // Flying roots
+    // ==================== DRAW FLYING ROOTS ====================
     flyingRoots.forEach(r => drawFlyingRoot(r));
     
     // Platforms
@@ -1357,10 +1365,11 @@ function initGame() {
     
     initBackground();
     
-    // Spawn initial flying roots - spread across screen
+    // Spawn initial flying roots
     for (let i = 0; i < 2; i++) {
         spawnFlyingRoot();
-        flyingRoots[i].x = canvas.width * 0.3 + i * 200;
+        // Spread them out
+        flyingRoots[i].x = canvas.width * 0.4 + i * 250;
     }
     
     document.getElementById('coins').textContent = '0';
