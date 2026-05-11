@@ -2,55 +2,68 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Shadow Runner</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="gameContainer">
-        <canvas id="gameCanvas"></canvas>
-        
-        <div id="ui">
-            <div class="stat">
-                <span class="stat-icon">💰</span>
-                <span id="score">0</span>
+    <div id="gameWrapper">
+        <div id="gameContainer">
+            <canvas id="gameCanvas"></canvas>
+
+            <div id="ui">
+                <div class="stat">
+    <span class="stat-icon">💰</span>
+    <span id="coins">0</span>
+</div>
+
+<div class="stat">
+    <span class="stat-icon">⚔️</span>
+    <span id="kills">0</span>
+</div>
+                <div class="stat">
+                    <span class="stat-icon">❤️</span>
+                    <span id="lives">3</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-icon">⏱️</span>
+                    <span id="time">0:00</span>
+                </div>
             </div>
-            <div class="stat">
-                <span class="stat-icon">❤️</span>
-                <span id="lives">3</span>
+
+            <div id="warningMessage">⚠️ BATS APPROACHING!</div>
+
+            <div id="startScreen">
+                <h1>SHADOW RUNNER</h1>
+                <p class="subtitle">Dark Night Adventure</p>
+                <button class="btn btn-start" id="startBtn">START GAME</button>
+                <div class="controls-info">
+                    <div class="control-row">
+                        <span class="key">SWIPE ← →</span> Move
+                        <span class="key">TAP</span> Jump
+                    </div>
+                    <div class="control-row">
+                        <span class="key">SWIPE ↓</span> Slide
+                        <span class="key">⚔️ BTN</span> Attack
+                    </div>
+                </div>
             </div>
-            <div class="stat">
-                <span class="stat-icon">⏱️</span>
-                <span id="time">0:00</span>
+
+            <div id="gameOverScreen">
+                <h1>GAME OVER</h1>
+                <div class="final-score">
+                    <div>Score</div>
+                    <span id="finalScore">0</span>
+                </div>
+                <button class="btn btn-restart" id="restartBtn">PLAY AGAIN</button>
             </div>
         </div>
 
-        <div id="warningMessage">DRAGONS APPROACHING!</div>
-
-        <div id="gestureHint">
-            Tap = Jump | Double Tap = Double Jump<br>
-            Scroll Down = Slide
-        </div>
-
-        <!-- Attack Button Only -->
-        <div id="mobileControls">
-            <button class="control-btn" id="btnAttack">⚔️</button>
-        </div>
-
-        <div id="startScreen">
-            <h1>SHADOW RUNNER</h1>
-            <p class="subtitle">Endless Adventure Awaits</p>
-            <button class="btn btn-start" id="startBtn">Start Game</button>
-            <div class="controls-info">
-                <b>Desktop:</b> <span>SPACE/↑</span> Jump • <span>↓</span> Slide • <span>Z/X</span> Attack<br>
-                <b>Mobile:</b> Tap to Jump • Double Tap to Double Jump • Scroll Down to Slide • Button to Attack
-            </div>
-        </div>
-
-        <div id="gameOverScreen">
-            <h1>GAME OVER</h1>
-            <div class="final-score">Score: <span id="finalScore">0</span></div>
-            <button class="btn btn-restart" id="restartBtn">Play Again</button>
+        <div id="attackBar">
+            <button id="btnAttack" class="attack-btn">
+                <span class="attack-icon">⚔️</span>
+                <span class="attack-label">ATTACK</span>
+            </button>
         </div>
     </div>
 
