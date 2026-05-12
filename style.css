@@ -282,47 +282,36 @@ h1 {
     }
 }
 
-/* Replace the mobile @media section with this: */
-
 @media (max-width: 768px) {
     #gameContainer {
         border-radius: 0;
         border-left: none;
         border-right: none;
         max-height: calc(100vh - 75px);
-        aspect-ratio: auto; /* Remove fixed aspect ratio on mobile */
-        height: 60vh; /* Take 60% of screen height */
     }
-    
     h1 {
         font-size: 28px;
         letter-spacing: 4px;
     }
-    
     .subtitle {
         font-size: 12px;
         letter-spacing: 4px;
     }
-    
     .btn {
         padding: 12px 35px;
         font-size: 16px;
     }
-    
     .stat {
         font-size: 14px;
     }
-    
     #warningMessage {
         font-size: 20px;
     }
-    
     .control-row {
         flex-direction: column;
         gap: 8px;
         text-align: center;
     }
-    
     .attack-btn {
         width: 100px;
         height: 45px;
@@ -336,4 +325,4 @@ h1 {
     .final-score span {
         font-size: 36px;
     }
-    }
+}
