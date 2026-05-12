@@ -258,12 +258,15 @@ function spawnEnemy() {
             dead: false,
             deathTimer: 0,
             chasePlayer: chasePlayer,
-            jumpTimer: chasePlayer ? 60 + Math.random() * 60 : -1
+            jumpTimer: chasePlayer ? 60 + Math.random() * 60 : -1,
+            velocityY: 0,
+            grounded: true,
         });
     }
 }
 
 function createParticles(x, y, color, count, speed = 3) {
+if (particles.length > 120) return;
     for (let i = 0; i < count; i++) {
         const angle = (Math.PI * 2 / count) * i + Math.random() * 0.5;
         particles.push({
@@ -596,8 +599,14 @@ function update() {
             createParticles(coin.x, coin.y, '#ffd700', 8, 3);
         }
     });
-    coins = coins.filter(c => !c.collected && c.x > -50);
-    if (Math.random() < 0.025) spawnCoin();
+    coins = coins.filter(c =>
+    !c.collected &&
+    c.x > -50 &&
+    c.x < canvas.width + 50
+);
+   if (coins.length < 12 && Math.random() < 0.008) {
+    spawnCoin();
+}
     
     // Enemies
     enemies.forEach(e => {
@@ -774,7 +783,7 @@ function drawPlayer(px, py) {
     }
     
     ctx.shadowColor = '#0044aa';
-    ctx.shadowBlur = 20;
+    ctx.shadowBlur = 6;
     
     ctx.fillStyle = '#080810';
     ctx.beginPath();
@@ -819,7 +828,7 @@ function drawPlayer(px, py) {
         ctx.strokeStyle = '#00d4ff';
         ctx.lineWidth = 3;
         ctx.shadowColor = '#00d4ff';
-        ctx.shadowBlur = 20;
+        ctx.shadowBlur = 6;
         ctx.beginPath();
         ctx.arc(px + player.width/2, py + player.height/2, 45, -Math.PI/4, Math.PI/4);
         ctx.stroke();
@@ -1093,7 +1102,7 @@ function draw() {
     // Moon
     ctx.save();
     ctx.shadowColor = '#ccddff';
-    ctx.shadowBlur = 40;
+    ctx.shadowBlur = 10;
     ctx.fillStyle = '#ddeeff';
     ctx.beginPath();
     ctx.arc(canvas.width * 0.75, canvas.height * 0.18, 30, 0, Math.PI * 2);
